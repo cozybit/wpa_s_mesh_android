@@ -179,6 +179,7 @@ endif
 ifdef CONFIG_SAE
 CFLAGS += -DCONFIG_SAE
 OBJS += ../src/common/sae.o
+NEED_SHA256=y
 NEED_ECC=y
 NEED_DH_GROUPS=y
 endif
