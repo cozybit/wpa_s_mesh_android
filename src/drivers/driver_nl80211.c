@@ -2875,6 +2875,94 @@ static int wiphy_info_handler(struct nl_msg *msg, void *arg)
 		capa->max_acl_mac_addrs =
 			nla_get_u8(tb[NL80211_ATTR_MAC_ACL_MAX]);
 
+	if (tb[NL80211_ATTR_SUPPORTED_IFTYPES]) {
+		struct nlattr *nl_mode;
+		int i;
+		nla_for_each_nested(nl_mode,
+				    tb[NL80211_ATTR_SUPPORTED_IFTYPES], i) {
+			switch (nla_type(nl_mode)) {
+			case NL80211_IFTYPE_AP:
+				capa->flags |= WPA_DRIVER_FLAGS_AP;
+				break;
+			case NL80211_IFTYPE_MESH_POINT:
+				capa->flags |= WPA_DRIVER_FLAGS_MESH;
+				break;
+			case NL80211_IFTYPE_P2P_GO:
+				p2p_go_supported = 1;
+				break;
+			case NL80211_IFTYPE_P2P_CLIENT:
+				p2p_client_supported = 1;
+				break;
+			case NL80211_IFTYPE_MONITOR:
+				info->monitor_supported = 1;
+				break;
+			}
+		}
+	}
+
+	if (tb[NL80211_ATTR_INTERFACE_COMBINATIONS]) {
+		struct nlattr *nl_combi;
+		int rem_combi;
+
+		nla_for_each_nested(nl_combi,
+				    tb[NL80211_ATTR_INTERFACE_COMBINATIONS],
+				    rem_combi) {
+			struct nlattr *tb_comb[NUM_NL80211_IFACE_COMB];
+			struct nlattr *tb_limit[NUM_NL80211_IFACE_LIMIT];
+			struct nlattr *nl_limit, *nl_mode;
+			int err, rem_limit, rem_mode;
+			int combination_has_p2p = 0, combination_has_mgd = 0;
+
+			err = nla_parse_nested(tb_comb, MAX_NL80211_IFACE_COMB,
+					       nl_combi,
+					       iface_combination_policy);
+			if (err || !tb_comb[NL80211_IFACE_COMB_LIMITS] ||
+			    !tb_comb[NL80211_IFACE_COMB_MAXNUM] ||
+			    !tb_comb[NL80211_IFACE_COMB_NUM_CHANNELS])
+				goto broken_combination;
+
+			nla_for_each_nested(nl_limit,
+					    tb_comb[NL80211_IFACE_COMB_LIMITS],
+					    rem_limit) {
+				err = nla_parse_nested(tb_limit,
+						       MAX_NL80211_IFACE_LIMIT,
+						       nl_limit,
+						       iface_limit_policy);
+				if (err ||
+				    !tb_limit[NL80211_IFACE_LIMIT_TYPES])
+					goto broken_combination;
+
+				nla_for_each_nested(
+					nl_mode,
+					tb_limit[NL80211_IFACE_LIMIT_TYPES],
+					rem_mode) {
+					int ift = nla_type(nl_mode);
+					if (ift == NL80211_IFTYPE_P2P_GO ||
+					    ift == NL80211_IFTYPE_P2P_CLIENT)
+						combination_has_p2p = 1;
+					if (ift == NL80211_IFTYPE_STATION)
+						combination_has_mgd = 1;
+				}
+				if (combination_has_p2p && combination_has_mgd)
+					break;
+			}
+
+			if (combination_has_p2p && combination_has_mgd) {
+				p2p_concurrent = 1;
+				if (nla_get_u32(tb_comb[NL80211_IFACE_COMB_NUM_CHANNELS]) > 1)
+					p2p_multichan_concurrent = 1;
+				break;
+			}
+
+broken_combination:
+			;
+		}
+	}
+
+	if (tb[NL80211_ATTR_SUPPORTED_COMMANDS]) {
+		struct nlattr *nl_cmd;
+		int i;
+
 	wiphy_info_supported_iftypes(info, tb[NL80211_ATTR_SUPPORTED_IFTYPES]);
 	wiphy_info_iface_comb(info, tb[NL80211_ATTR_INTERFACE_COMBINATIONS]);
 	wiphy_info_supp_cmds(info, tb[NL80211_ATTR_SUPPORTED_COMMANDS]);
@@ -8767,6 +8855,9 @@ static int wpa_driver_nl80211_if_add(void *priv, enum wpa_driver_if_type type,
 	}
 #endif /* HOSTAPD */
 
+#ifdef CONFIG_MESH
+	/* TODO: enable mesh if */
+#endif
 	if (drv->global)
 		drv->global->if_add_ifindex = ifidx;
 
