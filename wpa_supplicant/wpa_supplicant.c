@@ -50,6 +50,7 @@
 #include "offchannel.h"
 #include "hs20_supplicant.h"
 #include "wnm_sta.h"
+#include "mesh.h"
 
 const char *wpa_supplicant_version =
 "wpa_supplicant v" VERSION_STR "\n"
@@ -1668,7 +1669,7 @@ void wpa_supplicant_associate(struct wpa_supplicant *wpa_s,
 		((freq = wpa_drv_shared_freq(wpa_s)) > 0) && (freq != params.freq)) {
 		wpa_printf(MSG_DEBUG, "Shared interface with conflicting frequency found (%d != %d)"
 																, freq, params.freq);
-		if (wpas_p2p_handle_frequency_conflicts(wpa_s, params.freq, ssid) < 0) 
+		if (wpas_p2p_handle_frequency_conflicts(wpa_s, params.freq, ssid) < 0)
 			return;
 	}
 #endif

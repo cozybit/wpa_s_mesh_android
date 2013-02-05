@@ -3169,7 +3169,12 @@ enum wpa_event_type {
 	 * with the specified client (for example, max client reached, etc.) in
 	 * AP mode.
 	 */
-	EVENT_CONNECT_FAILED_REASON
+	EVENT_CONNECT_FAILED_REASON,
+
+    /**
+	 * EVENT_NEW_PEER_CANDIDATE - new (unknown) mesh peer notification
+	 */
+	EVENT_NEW_PEER_CANDIDATE,
 };
 
 
@@ -3807,6 +3812,21 @@ union wpa_event_data {
 			BLOCKED_CLIENT
 		} code;
 	} connect_failed_reason;
+
+	/**
+	 * struct mesh_peer
+	 *
+	 * @peer: peer address
+	 * @ies: beacon IEs
+	 * @ie_len: length of @ies
+	 *
+	 * Notification of new (peer doesn't exist in driver) mesh peer.
+	 */
+	struct mesh_peer {
+		u8 peer[ETH_ALEN];
+		u8 *ies;
+		int ie_len;
+	} mesh_peer;
 };
 
 /**
