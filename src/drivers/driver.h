@@ -1064,6 +1064,11 @@ struct hostapd_sta_add_params {
 	int vht_opmode_enabled;
 	u8 vht_opmode;
 	u32 flags; /* bitmask of WPA_STA_* flags */
+#ifdef CONFIG_MESH
+	enum mesh_plink_state plink_state;
+	/* TODO: plink_action */
+	/* TODO: mesh power mode */
+#endif /* CONFIG_MESH */
 	int set; /* Set STA parameters instead of add */
 	u8 qosinfo;
 	const u8 *ext_capab;
