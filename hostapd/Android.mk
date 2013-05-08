@@ -14,6 +14,12 @@ endif
 
 ifeq ($(WPA_BUILD_HOSTAPD),true)
 
+# yes to secure mesh, XXX: should be a feature
+ifeq ($(WPA_SUPPLICANT_VERSION),MESH)
+  CONFIG_MESH=y
+  CONFIG_SAE=y
+endif
+
 include $(LOCAL_PATH)/android.config
 
 # To ignore possible wrong network configurations
@@ -205,6 +211,10 @@ L_CFLAGS += -DCONFIG_SAE
 OBJS += src/common/sae.c
 NEED_ECC=y
 NEED_DH_GROUPS=y
+endif
+
+ifdef CONFIG_MESH
+L_CFLAGS += -DCONFIG_MESH
 endif
 
 ifdef CONFIG_IEEE80211N
