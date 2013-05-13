@@ -3033,6 +3033,7 @@ broken_combination:
 #endif
 		info->device_ap_sme = 1;
 
+<<<<<<< HEAD
 	wiphy_info_feature_flags(info, tb[NL80211_ATTR_FEATURE_FLAGS]);
 	wiphy_info_probe_resp_offload(capa,
 				      tb[NL80211_ATTR_PROBE_RESP_OFFLOAD]);
@@ -3059,6 +3060,34 @@ broken_combination:
 			drv->extended_capa = NULL;
 			drv->extended_capa_len = 0;
 		}
+=======
+	if (tb[NL80211_ATTR_FEATURE_FLAGS]) {
+		u32 flags = nla_get_u32(tb[NL80211_ATTR_FEATURE_FLAGS]);
+
+		if (flags & NL80211_FEATURE_SK_TX_STATUS)
+			info->data_tx_status = 1;
+		else
+			info->data_tx_status = 1;
+
+		if (flags & NL80211_FEATURE_INACTIVITY_TIMER)
+			capa->flags |= WPA_DRIVER_FLAGS_INACTIVITY_TIMER;
+
+		if (flags & NL80211_FEATURE_SAE)
+			capa->flags |= WPA_DRIVER_FLAGS_SAE;
+
+		if (flags & NL80211_FEATURE_NEED_OBSS_SCAN)
+			capa->flags |= WPA_DRIVER_FLAGS_OBSS_SCAN;
+	}
+
+	if (tb[NL80211_ATTR_PROBE_RESP_OFFLOAD]) {
+		int protocols =
+			nla_get_u32(tb[NL80211_ATTR_PROBE_RESP_OFFLOAD]);
+		wpa_printf(MSG_DEBUG, "nl80211: Supports Probe Response "
+			   "offload in AP mode");
+		capa->flags |= WPA_DRIVER_FLAGS_PROBE_RESP_OFFLOAD;
+		capa->probe_resp_offloads =
+			probe_resp_offload_support(protocols);
+>>>>>>> 2474a80... needed android hacks
 	}
 
 	return NL_SKIP;
