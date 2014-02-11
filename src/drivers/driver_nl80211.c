@@ -3033,7 +3033,7 @@ broken_combination:
 #endif
 		info->device_ap_sme = 1;
 
-<<<<<<< HEAD
+
 	wiphy_info_feature_flags(info, tb[NL80211_ATTR_FEATURE_FLAGS]);
 	wiphy_info_probe_resp_offload(capa,
 				      tb[NL80211_ATTR_PROBE_RESP_OFFLOAD]);
@@ -3060,7 +3060,7 @@ broken_combination:
 			drv->extended_capa = NULL;
 			drv->extended_capa_len = 0;
 		}
-=======
+
 	if (tb[NL80211_ATTR_FEATURE_FLAGS]) {
 		u32 flags = nla_get_u32(tb[NL80211_ATTR_FEATURE_FLAGS]);
 
@@ -3087,7 +3087,6 @@ broken_combination:
 		capa->flags |= WPA_DRIVER_FLAGS_PROBE_RESP_OFFLOAD;
 		capa->probe_resp_offloads =
 			probe_resp_offload_support(protocols);
->>>>>>> 2474a80... needed android hacks
 	}
 
 	return NL_SKIP;
