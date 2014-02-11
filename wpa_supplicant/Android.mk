@@ -14,8 +14,6 @@ else
   CONFIG_DRIVER_TEST := y
 endif
 
-ifeq ($(WPA_BUILD_SUPPLICANT),true)
-
 # yes to secure mesh, XXX: should be a feature
 ifeq ($(WPA_SUPPLICANT_VERSION),MESH)
   CONFIG_MESH=y
