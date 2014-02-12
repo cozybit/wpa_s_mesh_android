@@ -1,10 +1,10 @@
 LOCAL_PATH:= $(call my-dir)
 
 ifndef WPA_SUPPLICANT_VERSION
-WPA_SUPPLICANT_VERSION := VER_0_8_X
+WPA_SUPPLICANT_VERSION := MESH
 endif
 
-ifeq ($(WPA_SUPPLICANT_VERSION),VER_0_8_X)
+ifeq ($(WPA_SUPPLICANT_VERSION),MESH)
 # The order of the 2 Android.mks does matter!
 # TODO: Clean up the Android.mks, reset all the temporary variables at the
 # end of each Android.mk, so that one Android.mk doesn't depend on variables
@@ -13,6 +13,6 @@ include $(LOCAL_PATH)/hostapd/Android.mk \
         $(LOCAL_PATH)/wpa_supplicant/Android.mk
 endif
 
-ifeq ($(WPA_SUPPLICANT_VERSION),MESH)
-    include $(call all-subdir-makefiles)
-endif
+#ifeq ($(WPA_SUPPLICANT_VERSION),MESH)
+#    include $(call all-subdir-makefiles)
+#endif

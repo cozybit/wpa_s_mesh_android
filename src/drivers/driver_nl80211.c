@@ -3803,7 +3803,12 @@ wpa_driver_nl80211_finish_drv_init(struct wpa_driver_nl80211_data *drv)
 	drv->first_bss.ifindex = drv->ifindex;
 
 #ifndef HOSTAPD
-#ifndef CONFIG_MESH
+//#ifndef CONFIG_MESH// TODO:JAM The comment indicates we should be able to add
+                     // the mesh interface with a proper interface type config.
+                     // and not trigger this code... need to figure out how
+                     // to do this, instead of commenting out this code.
+                     // Commenting this code breaks the Android state machine
+                     // for regular wifi.
 	/*
 	 * Make sure the interface starts up in station mode unless this is a
 	 * dynamically added interface (e.g., P2P) that was already configured
@@ -3832,7 +3837,7 @@ wpa_driver_nl80211_finish_drv_init(struct wpa_driver_nl80211_data *drv)
 
 	netlink_send_oper_ifla(drv->global->netlink, drv->ifindex,
 			       1, IF_OPER_DORMANT);
-#endif /* CONFIG_MESH */
+//#endif /* CONFIG_MESH */
 #endif /* HOSTAPD */
 
 	if (wpa_driver_nl80211_capa(drv))
