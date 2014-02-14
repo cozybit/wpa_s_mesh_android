@@ -8077,14 +8077,15 @@ done:
 		nl80211_mgmt_unsubscribe(bss, "mode change");
 	}
 
-	if (!bss->in_deinit && !is_ap_interface(nlmode) &&
-	    nl80211_mgmt_subscribe_non_ap(bss) < 0)
-		wpa_printf(MSG_DEBUG, "nl80211: Failed to register Action "
-			   "frame processing - ignore for now");
-
 	if (is_mesh_interface(nlmode))
 		if (nl80211_mgmt_subscribe_mesh(bss))
 			return -1;
+
+	if (!bss->in_deinit && !is_ap_interface(nlmode) &&
+	    !is_mesh_interface(nlmode) &&
+	    nl80211_mgmt_subscribe_non_ap(bss) < 0)
+		wpa_printf(MSG_DEBUG, "nl80211: Failed to register Action "
+			   "frame processing - ignore for now");
 
 	return 0;
 }
