@@ -715,7 +715,7 @@ void mesh_mpm_action_rx(struct wpa_supplicant *wpa_s,
 		return;
 
 	/* peer is in sae_accepted? */
-	if (sta->sae->state != SAE_ACCEPTED)
+	if (sta->sae && sta->sae->state != SAE_ACCEPTED)
 		return;
 
 	if (!sta->my_lid)
