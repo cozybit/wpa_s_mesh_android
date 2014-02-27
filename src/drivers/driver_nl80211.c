@@ -3645,7 +3645,9 @@ static int nl80211_mgmt_subscribe_non_ap(struct i802_bss *bss)
 
 static int nl80211_mgmt_subscribe_mesh(struct i802_bss *bss)
 {
-	if (bss->nl_mgmt == NULL)
+    // TODO: [mesh] revisit this function, did not merge cleanly
+
+    if (bss->nl_mgmt == NULL)
 		return -1;
 
 	wpa_printf(MSG_DEBUG, "nl80211: Subscribe to mgmt frames with mesh "
