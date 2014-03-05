@@ -2801,6 +2801,25 @@ void wpa_supplicant_event(void *ctx, enum wpa_event_type event,
 				break;
 			}
 #endif /* CONFIG_P2P */
+// TODO: [mesh] need to port this to Android wpa_s
+#if 0
+#ifdef CONFIG_IBSS_RSN
+			if (wpa_s->current_ssid->mode == WPAS_MODE_IBSS &&
+			    stype == WLAN_FC_STYPE_AUTH &&
+			    data->rx_mgmt.frame_len >= 30) {
+				wpa_supplicant_event_ibss_auth(wpa_s, data);
+				break;
+			}
+#endif /* CONFIG_IBSS_RSN */
+
+			if (stype == WLAN_FC_STYPE_ACTION) {
+				wpas_event_rx_mgmt_action(
+					wpa_s, mgmt, data->rx_mgmt.frame_len,
+					data->rx_mgmt.freq);
+				break;
+			}
+
+#endif
 #ifdef CONFIG_MESH
 			if (wpa_s->ifmsh) {
 				mesh_mpm_mgmt_rx(wpa_s, &data->rx_mgmt);
