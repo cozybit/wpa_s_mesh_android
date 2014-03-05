@@ -407,7 +407,8 @@ struct hostapd_bss_config {
 #define P2P_MANAGE BIT(3)
 #define P2P_ALLOW_CROSS_CONNECTION BIT(4)
 	int p2p;
-
+#define MESH_ENABLED BIT(0)
+	int mesh;
 	int disassoc_low_ack;
 	int skip_inactivity_poll;
 
