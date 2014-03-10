@@ -2789,10 +2789,10 @@ struct wpa_driver_ops {
 	int (*join_mesh)(void *priv, struct wpa_driver_mesh_join_params *params);
 
 	/**
- 	 * leave_mesh - Leave a mesh network
- 	 * @priv: Private driver interface data
- 	 * Returns 0 on success, -1 on failure
- 	 */
+	 * leave_mesh - Leave a mesh network
+	 * @priv: Private driver interface data
+	 * Returns 0 on success, -1 on failure
+	 */
 	int (*leave_mesh)(void *priv);
 };
 
