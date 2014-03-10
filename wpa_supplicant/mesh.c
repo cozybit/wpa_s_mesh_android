@@ -88,8 +88,8 @@ wpa_supplicant_mesh_init(struct wpa_supplicant *wpa_s,
 
 	if (!wpa_s->conf->user_mpm) {
 		/* not much for us to do here */
-		wpa_msg(wpa_s, MSG_WARNING, "user_mpm is not enabled"
-			"on wpa_supplicant.conf");
+		wpa_msg(wpa_s, MSG_WARNING, "WARNING: user_mpm is not enabled"
+			" on wpa_supplicant.conf");
 		return 0;
 	}
 
