@@ -1,3 +1,11 @@
+/*
+ * WPA Supplicant - Mesh RSN routines
+ * Copyright (c) 2013-2014, cozybit, Inc.  All rights reserved.
+ *
+ * This software may be distributed under the terms of the BSD license.
+ * See README for more details.
+ */
+
 #ifndef MESH_RSN_H
 #define MESH_RSN_H
 #include "mesh_mpm.h"
