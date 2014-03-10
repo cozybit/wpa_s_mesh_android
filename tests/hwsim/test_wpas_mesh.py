@@ -1,5 +1,3 @@
-#!/usr/bin/python
-#
 # wpa_supplicant mesh mode tests
 # Copyright (c) 2014, cozybit Inc.
 #
