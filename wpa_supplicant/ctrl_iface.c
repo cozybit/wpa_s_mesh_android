@@ -2153,19 +2153,17 @@ static char * wpa_supplicant_ie_txt(char *pos, char *end, const char *proto,
 #ifdef CONFIG_MESH
 	if (data.key_mgmt & WPA_KEY_MGMT_SAE) {
 		ret = os_snprintf(pos, end - pos, "%sSAE",
-				  first ? "" : "+");
+				  pos == start ? "" : "+");
 		if (ret < 0 || ret >= end - pos)
 			return pos;
 		pos += ret;
-		first = 0;
 	}
 	if (data.key_mgmt & WPA_KEY_MGMT_FT_SAE) {
 		ret = os_snprintf(pos, end - pos, "%sFT_SAE",
-				  first ? "" : "+");
+				  pos == start ? "" : "+");
 		if (ret < 0 || ret >= end - pos)
 			return pos;
 		pos += ret;
-		first = 0;
 	}
 #endif /* CONFIG_MESH */
 
