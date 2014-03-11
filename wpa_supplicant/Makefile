@@ -3,7 +3,7 @@ CC=gcc
 endif
 
 ifndef CFLAGS
-CFLAGS = -MMD -O2 -Wall -g
+CFLAGS = -MMD -Wall -g
 endif
 
 export LIBDIR ?= /usr/local/lib/
@@ -250,6 +250,15 @@ ifdef CONFIG_IBSS_RSN
 NEED_RSN_AUTHENTICATOR=y
 CFLAGS += -DCONFIG_IBSS_RSN
 OBJS += ibss_rsn.o
+endif
+
+ifdef CONFIG_MESH
+NEED_80211_COMMON=y
+NEED_AES_SIV=y
+NEED_AES_OMAC1=y
+NEED_AES_CTR=y
+CFLAGS += -DCONFIG_MESH
+OBJS += # TODO
 endif
 
 ifdef CONFIG_P2P
