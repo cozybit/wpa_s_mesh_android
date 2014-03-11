@@ -1360,11 +1360,13 @@ void wpa_supplicant_associate(struct wpa_supplicant *wpa_s,
 
 	if (ssid->mode == WPAS_MODE_MESH) {
 #ifdef CONFIG_MESH
+#if 0
 		if (!(wpa_s->drv_flags & WPA_DRIVER_FLAGS_MESH)) {
 			wpa_msg(wpa_s, MSG_INFO, "Driver does not support "
 				"mesh mode");
 			return;
 		}
+#endif
 		if (bss)
 			ssid->frequency = bss->freq;
 		if (wpa_supplicant_join_mesh(wpa_s, ssid) < 0) {
