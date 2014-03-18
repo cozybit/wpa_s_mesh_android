@@ -20,8 +20,8 @@ ctrl_interface=DIR=/data/misc/wifi/wpas
 network={
   ssid="bazooka"
   mode=5
-key_mgmt=SAE
-psk="seeeecrit"
+#key_mgmt=SAE
+#psk="seeeecrit"
   frequency=2442
 }
 set_network 1 enabled
