@@ -4804,8 +4804,7 @@ static void wpa_driver_nl80211_deinit(struct i802_bss *bss)
 
 	if (!drv->start_iface_up)
 		(void) i802_set_iface_flags(bss, 0);
-
-	if (drv->nlmode != NL80211_IFTYPE_P2P_DEVICE && drv->nlmode != NL80211_IFTYPE_MESH_POINT) {
+	if (drv->nlmode != NL80211_IFTYPE_P2P_DEVICE) {
 		if (!drv->hostapd || !drv->start_mode_ap)
 			wpa_driver_nl80211_set_mode(bss,
 						    NL80211_IFTYPE_STATION);
@@ -8902,8 +8901,6 @@ nla_put_failure:
 static int nl80211_set_mode(struct wpa_driver_nl80211_data *drv,
 			    int ifindex, enum nl80211_iftype mode)
 {
-    mode = NL80211_IFTYPE_MESH_POINT;
-
 	struct nl_msg *msg;
 	int ret = -ENOBUFS;
 
