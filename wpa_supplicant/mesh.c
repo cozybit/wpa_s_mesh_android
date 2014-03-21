@@ -13,7 +13,9 @@ wpa_supplicant_mesh_deinit(struct wpa_supplicant *wpa_s)
 {
 	wpa_supplicant_mesh_iface_deinit(wpa_s, wpa_s->ifmsh);
 	wpa_s->ifmsh = NULL;
-	os_free(wpa_s->mesh_rsn);
+	if (wpa_s->mesh_rsn)
+		os_free(wpa_s->mesh_rsn);
+	wpa_s->mesh_rsn = NULL;
 	/* TODO: leave mesh (stop beacon). This will happen on link down
 	 * anyway, so it's not urgent */
 	return;
@@ -213,13 +215,6 @@ void wpa_mesh_notify_peer(struct wpa_supplicant *wpa_s, const u8 *addr,
 			  const u8 *ies, int ie_len)
 {
 	struct ieee802_11_elems elems;
-	struct wpa_ssid *ssid = wpa_s->current_ssid;
-
-	if (ssid && ssid->no_auto_peer) {
-		wpa_msg(wpa_s, MSG_INFO, "ignored new peer notification for "
-			MACSTR " because of no_auto_peer", MAC2STR(addr));
-		return;
-	}
 
 	wpa_msg(wpa_s, MSG_INFO,
 		"new peer notification for " MACSTR, MAC2STR(addr));

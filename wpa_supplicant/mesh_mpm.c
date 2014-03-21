@@ -16,7 +16,8 @@
 #define dot11MeshHoldingTimeout 1
 
 static void
-mesh_mpm_plink_open(struct wpa_supplicant *wpa_s, struct sta_info *sta);
+mesh_mpm_plink_open(struct wpa_supplicant *wpa_s, struct sta_info *sta,
+					enum mesh_plink_state next_state);
 static void
 mesh_mpm_send_plink_action(struct wpa_supplicant *wpa_s,
 				       struct sta_info *sta,
@@ -289,7 +290,7 @@ mesh_mpm_auth_peer(struct wpa_supplicant *wpa_s, const u8 *addr)
 		wpa_msg(wpa_s, MSG_ERROR, "Driver failed to set " MACSTR ": %d",
 			MAC2STR(sta->addr), ret);
 
-	mesh_mpm_plink_open(wpa_s, sta);
+	mesh_mpm_plink_open(wpa_s, sta, PLINK_OPEN_SENT);
 }
 
 void
@@ -301,6 +302,7 @@ wpa_mesh_new_mesh_peer(struct wpa_supplicant *wpa_s, const u8 *addr,
 	struct mesh_conf *conf = wpa_s->ifmsh->mconf;
 	struct hostapd_data *data = wpa_s->ifmsh->bss[0];
 	struct sta_info *sta;
+	struct wpa_ssid *ssid = wpa_s->current_ssid;
 	int ret = 0;
 
 	sta = ap_get_sta(data, addr);
@@ -354,8 +356,14 @@ wpa_mesh_new_mesh_peer(struct wpa_supplicant *wpa_s, const u8 *addr,
 		return;
 	}
 
+	if (ssid && ssid->no_auto_peer) {
+		wpa_msg(wpa_s, MSG_INFO, "will not initiate new peer link with "
+			MACSTR " because of no_auto_peer", MAC2STR(addr));
+		return;
+	}
+
 	if (conf->security == MESH_CONF_SEC_NONE)
-		mesh_mpm_plink_open(wpa_s, sta);
+		mesh_mpm_plink_open(wpa_s, sta, PLINK_OPEN_SENT);
 	else
 		mesh_rsn_auth_sae_sta(wpa_s, sta);
 }
@@ -538,29 +546,30 @@ static void mesh_mpm_plink_estab(struct wpa_supplicant *wpa_s,
 
 /* initiate peering with station */
 static void
-mesh_mpm_plink_open(struct wpa_supplicant *wpa_s, struct sta_info *sta)
+mesh_mpm_plink_open(struct wpa_supplicant *wpa_s, struct sta_info *sta,
+						enum mesh_plink_state next_state)
 {
 	eloop_register_timeout(dot11MeshRetryTimeout, 0, plink_timer, wpa_s, sta);
 	mesh_mpm_send_plink_action(wpa_s, sta, PLINK_OPEN, 0);
 	mesh_mpm_send_plink_action(wpa_s, sta, PLINK_CONFIRM, 0);
-	wpa_mesh_set_plink_state(wpa_s, sta, PLINK_OPEN_SENT);
+	wpa_mesh_set_plink_state(wpa_s, sta, next_state);
 }
 
 static void mesh_mpm_fsm(struct wpa_supplicant *wpa_s, struct sta_info *sta,
-			 enum plink_event next_state)
+			 enum plink_event event)
 {
 	struct mesh_conf *conf = wpa_s->ifmsh->mconf;
 	u16 reason = 0;
 
-	mpl_dbg(wpa_s, sta, next_state);
+	mpl_dbg(wpa_s, sta, event);
 	switch (sta->plink_state) {
 	case PLINK_LISTEN:
-		switch (next_state) {
+		switch (event) {
 		case CLS_ACPT:
 			mesh_mpm_fsm_restart(wpa_s, sta);
 			break;
 		case OPN_ACPT:
-			mesh_mpm_plink_open(wpa_s, sta);
+			mesh_mpm_plink_open(wpa_s, sta, PLINK_OPEN_RCVD);
 			break;
 		default:
 			break;
@@ -568,7 +577,7 @@ static void mesh_mpm_fsm(struct wpa_supplicant *wpa_s, struct sta_info *sta,
 		break;
 
 	case PLINK_OPEN_SENT:
-		switch (next_state) {
+		switch (event) {
 		case OPN_RJCT:
 		case CNF_RJCT:
 			reason = WLAN_REASON_MESH_CONFIG_POLICY_VIOLATION;
@@ -595,7 +604,7 @@ static void mesh_mpm_fsm(struct wpa_supplicant *wpa_s, struct sta_info *sta,
 		break;
 
 	case PLINK_OPEN_RCVD:
-		switch (next_state) {
+		switch (event) {
 		case OPN_RJCT:
 		case CNF_RJCT:
 			reason = WLAN_REASON_MESH_CONFIG_POLICY_VIOLATION;
@@ -622,7 +631,7 @@ static void mesh_mpm_fsm(struct wpa_supplicant *wpa_s, struct sta_info *sta,
 		break;
 
 	case PLINK_CNF_RCVD:
-		switch (next_state) {
+		switch (event) {
 		case OPN_RJCT:
 		case CNF_RJCT:
 			reason = WLAN_REASON_MESH_CONFIG_POLICY_VIOLATION;
@@ -644,7 +653,7 @@ static void mesh_mpm_fsm(struct wpa_supplicant *wpa_s, struct sta_info *sta,
 		break;
 
 	case PLINK_ESTAB:
-		switch (next_state) {
+		switch (event) {
 		case CLS_ACPT:
 			wpa_mesh_set_plink_state(wpa_s, sta, PLINK_HOLDING);
 			reason = WLAN_REASON_MESH_CLOSE_RCVD;
@@ -672,7 +681,7 @@ static void mesh_mpm_fsm(struct wpa_supplicant *wpa_s, struct sta_info *sta,
 		}
 		break;
 	case PLINK_HOLDING:
-		switch (next_state) {
+		switch (event) {
 		case CLS_ACPT:
 			mesh_mpm_fsm_restart(wpa_s, sta);
 			break;
@@ -688,8 +697,8 @@ static void mesh_mpm_fsm(struct wpa_supplicant *wpa_s, struct sta_info *sta,
 		}
 		break;
 	default:
-		wpa_msg(wpa_s, MSG_INFO, "Unsupported MPM transition: %d -> %d",
-			sta->plink_state, next_state);
+		wpa_msg(wpa_s, MSG_INFO, "Unsupported MPM event %s for state %s",
+					mplevent[event], mplstate[sta->plink_state]);
 		break;
 	}
 /* TODO
