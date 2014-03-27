@@ -2464,7 +2464,6 @@ static void nl80211_new_peer_candidate(struct wpa_driver_nl80211_data *drv,
 	data.mesh_peer.ie_len = ie_len;
 	wpa_supplicant_event(drv->ctx, EVENT_NEW_PEER_CANDIDATE, &data);
 	os_free(data.mesh_peer.ies);
-	return;
 }
 
 
@@ -3611,8 +3610,18 @@ static void wiphy_info_feature_flags(struct wiphy_info_data *info,
 
 	if (flags & NL80211_FEATURE_SK_TX_STATUS)
 		info->data_tx_status = 1;
-	else
+	else {
+
+		/*
+		 * For some reason NL80211_FEATURE_SK_TX_STATUS is not set on
+		 * android (no issues on pc using the same compat-drivers).
+		 * But this feature is needed for wpa_supplicant to use the
+		 * nl80211 frame injection API.
+		 */
+
+		wpa_printf(MSG_WARNING, "nl80211: Assuming NL80211_FEATURE_SK_TX_STATUS");
 		info->data_tx_status = 1;
+	}
 
 	if (flags & NL80211_FEATURE_INACTIVITY_TIMER)
 		capa->flags |= WPA_DRIVER_FLAGS_INACTIVITY_TIMER;
@@ -7393,6 +7402,9 @@ static u32 sta_plink_state_nl80211(enum mesh_plink_state state)
 		return NL80211_PLINK_HOLDING;
 	case PLINK_BLOCKED:
 		return NL80211_PLINK_BLOCKED;
+	default:
+		wpa_printf(MSG_ERROR, "nl80211: Invalid mesh plink state %d",
+			   state);
 	}
 	return -1;
 }
@@ -8502,6 +8514,15 @@ nla_put_failure:
 	return ret;
 }
 
+static int wpa_driver_nl80211_init_mesh(void* priv)
+{
+	if (wpa_driver_nl80211_set_mode(priv, NL80211_IFTYPE_MESH_POINT)) {
+		wpa_printf(MSG_INFO, "nl80211: Failed to set interface into "
+				"mode mode");
+		return -1;
+	}
+	return 0;
+}
 
 static int nl80211_connect_common(struct wpa_driver_nl80211_data *drv,
 				  struct wpa_driver_associate_params *params,
@@ -8741,10 +8762,6 @@ static int wpa_driver_nl80211_join_mesh(
 	if (!msg)
 		return -1;
 
-	if (wpa_driver_nl80211_set_mode(drv->first_bss,
-					NL80211_IFTYPE_MESH_POINT))
-		return -1;
-
 	wpa_printf(MSG_DEBUG, "nl80211: mesh join (ifindex=%d)", drv->ifindex);
 	nl80211_cmd(drv, msg, 0, NL80211_CMD_JOIN_MESH);
 
@@ -8798,7 +8815,7 @@ static int wpa_driver_nl80211_join_mesh(
 		goto nla_put_failure;
 	}
 	ret = 0;
-	bss->freq = params->freq ? params->freq : 2432;
+	bss->freq = params->freq;
 	wpa_printf(MSG_DEBUG, "nl80211: mesh join request send successfully");
 
 
@@ -10009,9 +10026,6 @@ static int wpa_driver_nl80211_if_add(void *priv, enum wpa_driver_if_type type,
 			return -1;
 	}
 
-#ifdef CONFIG_MESH
-	/* TODO: enable mesh if */
-#endif
 	if (drv->global)
 		drv->global->if_add_ifindex = ifidx;
 
@@ -11946,6 +11960,7 @@ const struct wpa_driver_ops wpa_driver_nl80211_ops = {
 	.deauthenticate = driver_nl80211_deauthenticate,
 	.authenticate = driver_nl80211_authenticate,
 	.associate = wpa_driver_nl80211_associate,
+	.init_mesh = wpa_driver_nl80211_init_mesh,
 	.join_mesh = wpa_driver_nl80211_join_mesh,
 	.leave_mesh = wpa_driver_nl80211_leave_mesh,
 	.global_init = nl80211_global_init,

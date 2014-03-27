@@ -832,7 +832,8 @@ struct wpa_driver_ap_params {
 
 struct wpa_driver_mesh_bss_params {
 #define WPA_DRIVER_MESH_CONF_FLAG_AUTO_PLINKS	0x00000001
-	/* TODO: others */
+	/* TODO: Other mesh configuration parameters would go here.  See
+	 * NL80211_MESHCONF_* in nl80211.h for all the mesh config parameters. */
 	unsigned int flags;
 };
 
@@ -1039,8 +1040,8 @@ struct hostapd_sta_add_params {
 	u32 flags_mask; /* unset bits in flags */
 #ifdef CONFIG_MESH
 	enum mesh_plink_state plink_state;
-	/* TODO: plink_action */
-	/* TODO: mesh power mode */
+	enum plink_action_field plink_action;
+	enum mesh_power_mode power_mode;
 #endif /* CONFIG_MESH */
 	int set; /* Set STA parameters instead of add */
 	u8 qosinfo;
@@ -2723,6 +2724,14 @@ struct wpa_driver_ops {
 	int (*status)(void *priv, char *buf, size_t buflen);
 
 	/**
+	 * init_mesh - Driver specific initialization for mesh
+	 * @priv: Private driver interface data
+	 * @params: Mesh configuration parameters
+	 * Returns: 0 on success, -1 on failure
+	 */
+	int (*init_mesh)(void *priv);
+
+	/**
 	 * join_mesh - Join a mesh network
 	 * @priv: Private driver interface data
 	 * @params: Mesh configuration parameters
@@ -3850,7 +3859,7 @@ union wpa_event_data {
 	 * @ies: beacon IEs
 	 * @ie_len: length of @ies
 	 *
-	 * Notification of new (peer doesn't exist in driver) mesh peer.
+	 * Notification of new candidate mesh peer.
 	 */
 	struct mesh_peer {
 		u8 peer[ETH_ALEN];

@@ -178,6 +178,11 @@ wpa_supplicant_mesh_init(struct wpa_supplicant *wpa_s,
 
 	hostapd_setup_interface(ifmsh);
 
+	if (wpa_drv_init_mesh(wpa_s->drv_priv)) {
+		wpa_msg(wpa_s, MSG_ERROR, "failed to init mesh in driver");
+		return -1;
+	}
+
 	if (mconf->security != MESH_CONF_SEC_NONE) {
 		bss->conf->wpa = ssid->proto;
 		bss->conf->wpa_key_mgmt = ssid->key_mgmt;
@@ -238,7 +243,7 @@ int wpa_supplicant_join_mesh(struct wpa_supplicant *wpa_s,
 	struct wpa_driver_mesh_join_params params;
 	int ret = 0;
 
-	if (!ssid || !ssid->ssid || !ssid->ssid_len) {
+	if (!ssid || !ssid->ssid || !ssid->ssid_len || !ssid->frequency) {
 		ret = -ENOENT;
 		goto out;
 	}
