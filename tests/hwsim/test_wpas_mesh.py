@@ -43,7 +43,7 @@ def check_mesh_scan(dev, params, other_started=False):
 
     res = dev.request("SCAN_RESULTS")
 
-    if not res.find("[MESH]"):
+    if res.find("[MESH]") < 0:
         raise Exception("Scan did not contain a MESH network")
 
 
