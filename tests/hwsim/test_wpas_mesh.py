@@ -168,6 +168,7 @@ def test_wpas_mesh_mode_scan(dev):
     dev[0].set_network_quoted(id, "ssid", "wpas-mesh-open")
     dev[0].set_network(id, "key_mgmt", "NONE")
     dev[0].set_network(id, "frequency", "2412")
+    dev[0].set_network(id, "mesh_ht_mode", "HT40+")
     dev[0].mesh_group_add(id)
 
     id = dev[1].add_network()
@@ -175,6 +176,7 @@ def test_wpas_mesh_mode_scan(dev):
     dev[1].set_network_quoted(id, "ssid", "wpas-mesh-open")
     dev[1].set_network(id, "key_mgmt", "NONE")
     dev[1].set_network(id, "frequency", "2412")
+    dev[1].set_network(id, "mesh_ht_mode", "HT40+")
     dev[1].mesh_group_add(id)
 
     # Check for mesh joined
