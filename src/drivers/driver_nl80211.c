@@ -8798,6 +8798,18 @@ static int wpa_driver_nl80211_join_mesh(
 		NLA_PUT_U32(msg, NL80211_ATTR_WIPHY_CHANNEL_TYPE, ht_value);
 	}
 
+    if (params->basic_rates) {
+		u8 rates[NL80211_MAX_SUPP_RATES];
+		u8 rates_len = 0;
+		int i;
+
+		for (i = 0; i < NL80211_MAX_SUPP_RATES && params->basic_rates[i] >= 0;
+			 i++)
+			rates[rates_len++] = params->basic_rates[i] / 5;
+
+		NLA_PUT(msg, NL80211_ATTR_BSS_BASIC_RATES, rates_len, rates);
+    }
+
 	if (params->meshid) {
 		wpa_hexdump_ascii(MSG_DEBUG, "  * SSID",
 				  params->meshid, params->meshid_len);

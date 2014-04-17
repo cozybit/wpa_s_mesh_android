@@ -302,6 +302,7 @@ int wpa_supplicant_join_mesh(struct wpa_supplicant *wpa_s,
 	if (wpa_s->ifmsh) {
 		params.ies = wpa_s->ifmsh->mconf->ies;
 		params.ie_len = wpa_s->ifmsh->mconf->ie_len;
+		params.basic_rates = wpa_s->ifmsh->basic_rates;
 	}
 
 	wpa_msg(wpa_s, MSG_INFO, "joining mesh %s",
