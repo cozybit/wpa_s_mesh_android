@@ -78,7 +78,6 @@ mesh_config_create(struct wpa_ssid *ssid)
 	conf->mesh_pm_id = MESH_PATH_METRIC_AIRTIME;
 	conf->mesh_cc_id = 0;
 	conf->mesh_sp_id = MESH_SYNC_METHOD_NEIGHBOR_OFFSET;
-	/* TODO: the kernel actually doesn't set this correctly */
 	conf->mesh_auth_id = (conf->security & MESH_CONF_SEC_AUTH) ? 1 : 0;
 
 	return conf;
